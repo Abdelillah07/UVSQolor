@@ -13,10 +13,12 @@ photo = None
 canvas = None
 matrices_pixels = None
 matrice_affichage = None
+historique = []
+historique_undo = []
 
 # Gestion de l'affichage
 def charger(fenetre_principale):
-    global nom_fichier, photo, canvas, matrices_pixels
+    global nom_fichier, photo, canvas, matrices_pixels, historique
 
     nom_fichier = str(filedialog.askopenfilename(title="Ouvrir une image"))
 
@@ -25,6 +27,7 @@ def charger(fenetre_principale):
         # On crée une image Pillow puis on la convertit au format TkInter 
         img = pil.Image.open(nom_fichier)
         matrices_pixels = np.array(img)
+        historique.append(copy.deepcopy(matrices_pixels))
         photo = ImageTk.PhotoImage(img)
 
         if canvas is None:
@@ -53,8 +56,10 @@ def rafraichir_affichage(img):
 
 # Gestion des effets
 def applique_effet():
-    global dialogue_effet, matrices_pixels, matrice_affichage
+    global dialogue_effet, matrices_pixels, matrice_affichage, historique, historique_undo
     matrices_pixels = copy.deepcopy(matrice_affichage)
+    historique.append(matrices_pixels)
+    historique_undo = []
     dialogue_effet.destroy()
 
 def annule_effet(fenetre_principale):
@@ -74,10 +79,53 @@ def boutons(dialogue_effet, fenetre_principale):
                                command=lambda :annule_effet(fenetre_principale))
     bouton_annuler.pack(side=tk.LEFT, padx=10)
 
+# Revenir en arrière et en avant
+def undo(fenetre_principale):
+    """ Supprimer le dernier élément de la liste historique"""
+    global matrices_pixels, historique, historique_undo
+    if len(historique) > 1:
+        historique_undo.append(historique.pop())
+        matrices_pixels = copy.deepcopy(historique[-1])
+    rafraichir(fenetre_principale)
+
+def not_undo(fenetre_principale):
+    """ Revenir sur l'élément suppirmer de historique tant qu'il n'y pas eu de nouvelles modifications dans l'image"""
+    global matrices_pixels, historique, historique_undo
+    if historique_undo != []:
+        matrices_pixels = copy.deepcopy(historique_undo[-1])
+        historique.append(historique_undo.pop())
+    rafraichir(fenetre_principale)
+
+# Savegarder les modifiactions autant qu'image
+def fen_sauver():
+    global matrices_pixels, fen
+
+    """ Fenêtre pour enregistrer l'image"""
+    fen = tk.Toplevel()
+    fen.title("Enregistrer les modifications")
+
+    texte = tk.Label(fen, text = "Choisis le nom du fichier")
+    nom_fichier = tk.Entry(fen)
+    bouton_sauver = tk.Button(fen, text="Enregistrer", command=lambda: sauver(matrices_pixels, nom_fichier.get()))
+
+    # Emplacement des widgets
+    texte.grid(row=0, column=0)
+    nom_fichier.grid(row=0, column=1)
+    bouton_sauver.grid(row=1, column=0)
+
+def sauver(matPix, nom_fichier):
+    """ Sauvegarder l'image sous format .png"""
+    global fen
+    nom_fichier += ".png"
+    Image.fromarray(matPix).save(nom_fichier)
+    fen.destroy()
+
 #Filtre Vert
 def filtre_vert():
-    global matrices_pixels
+    global matrices_pixels, historique, historique_undo
     matrices_pixels[:,:,[0,2]] = 0
+    historique.append(matrices_pixels)
+    historique_undo = []
 
 def callback_vert(fenetre_principale):
     filtre_vert()
@@ -85,8 +133,10 @@ def callback_vert(fenetre_principale):
 
 #Filtre Gris
 def filtre_gris():
-    global matrices_pixels
+    global matrices_pixels, historique, historique_undo
     matrices_pixels = np.dot(matrices_pixels, np.array([0.2126, 0.7152, 0.0722]))
+    historique.append(matrices_pixels)
+    historique_undo = []
 
 def callback_gris(fenetre_principale):
     filtre_gris()
