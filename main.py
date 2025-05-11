@@ -16,11 +16,11 @@ file_menu2 = tk.Menu(menubar, tearoff=False)
 file_menu_filtre_couleur = tk.Menu(menubar, tearoff=False)
 
 # Bouton revenir en arrière
-button_undo = tk.Button(fenetre_principale, text="🔙", command=lambda: undo(fenetre_principale))
-button_undo.pack()
-
 button_not_undo = tk.Button(fenetre_principale, text="🔜", command= lambda: not_undo(fenetre_principale))
-button_not_undo.pack()
+button_not_undo.pack(side=tk.RIGHT, padx=2, pady=2)
+
+button_undo = tk.Button(fenetre_principale, text="🔙", command=lambda: undo(fenetre_principale))
+button_undo.pack(side=tk.RIGHT, padx=2, pady=2)
 
 # Rajouter l'onglet Fichier
 menubar.add_cascade(
