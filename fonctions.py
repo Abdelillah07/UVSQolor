@@ -300,9 +300,8 @@ def correction_flou_gaussien(facteur):
     global matrices_pixels, matrice_affichage
 
     facteur = int(facteur)
-    facteur =2*facteur +1
     matrice = copy.deepcopy(matrices_pixels)
-    kernel = noyau_gaussien(facteur, facteur)
+    kernel = noyau_gaussien(facteur, sigma=facteur / 3)
 
     # Appliquer la convolution sur chaque canal et mettre à jour la matrice
     for i in range(3):  # Itérer sur les canaux RGB
@@ -313,20 +312,12 @@ def correction_flou_gaussien(facteur):
     img_ajustee = Image.fromarray(matrice)
     rafraichir_affichage(img_ajustee)
 
-def noyau_gaussien(taille, sigma):
-    centre = taille // 2
-    kernel = np.zeros((taille, taille), dtype=float)
-
-    for i in range(taille):
-        for j in range(taille):
-            x = i - centre
-            y = j - centre
-            kernel[i, j] = np.exp(-(x**2 + y**2) / (2 * sigma**2))
-
-    kernel /= 2 * np.pi * sigma**2  # Normalisation constante
-    kernel /= np.sum(kernel)         # Normalisation pour que la somme = 1
-
-    return kernel
+def noyau_gaussien(size, sigma=None):
+    size = int(size) // 2
+    x, y = np.mgrid[-size:size+1, -size:size+1]
+    normal = 1 / (2.0 * np.pi * sigma**2)
+    kernel_g = np.exp(-((x**2 + y**2) / (2.0*sigma**2))) * normal
+    return kernel_g / np.sum(kernel_g)
 
 def callback_flou_de_gauss(fenetre_principale):
     filtre_flou_gaussien(fenetre_principale)
