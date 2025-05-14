@@ -1,5 +1,5 @@
 import tkinter as tk
-from fonctions import charger, undo, not_undo, fen_sauver, callback_vert, callback_gris, callback_luminosite, callback_constraste, callback_flou, callback_flou_de_gauss, callback_detection_bord, callback_fusion
+from fonctions import charger, undo, not_undo, fen_sauver, callback_vert, callback_gris, callback_symetrique, callback_luminosite, callback_constraste, callback_flou, callback_flou_de_gauss, callback_detection_bord, callback_fusion
 
 # Création de la fenêtre principale
 fenetre_principale = tk.Tk()
@@ -34,8 +34,6 @@ file_menu_filtre_couleur.add_command(label='Filtre Bleu', command=lambda : callb
 file_menu_filtre_couleur.add_command(label='Filtre Rouge', command=lambda : callback_rouge(fenetre_principale))
 
 file_menu2.add_command(label='Symétrique', command=lambda : callback_symetrique(fenetre_principale))
-
-file_menu2.add_command(label='Négatif', command=lambda : callback_negatif(fenetre_principale))
 
 file_menu2.add_command(label='Luminosité', command=lambda : callback_luminosite(fenetre_principale))
 
